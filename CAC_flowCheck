@@ -1,0 +1,76 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct  5 14:46:52 2021
+
+@author: rushi.panchal
+"""
+
+import pandas as pd 
+
+#import file 
+fileToImport = r"C:\Users\rushi.panchal\Downloads\CAC_SN_1000251_Flowdata.xlsx"
+df = pd.read_excel(fileToImport)
+
+#ch1 basic math overall flow rate calculation
+ch1 = df.loc[df['Channel'] == "One"]
+ch1_sp0 = ch1.loc[df['Setpoint [psi]']==0]
+ch1sp0_mean=ch1_sp0["Flow Rate [Sccm]"].mean()
+ch1_sp5 = ch1.loc[df['Setpoint [psi]']==5]
+ch1sp5_mean=ch1_sp5["Flow Rate [Sccm]"].mean()
+
+#basic flow noise math ch1
+ch1_basicMath = abs(ch1sp5_mean - ch1sp0_mean)
+if ch1_basicMath < 0.1:
+    ch1_basicPass = True 
+else: ch1_basicPass = False 
+
+#ch1 flow rate math focused to ch1sp0 (t 0s:30s) & ch1sp5 starting 8 seconds after pressure is set to 5psi 
+#ch1sp0
+ch1_sp0_index = ch1_sp0.index[ch1_sp0['Time [s]']==30].tolist()
+ch1sp0_30seconds_mean=ch1_sp0["Flow Rate [Sccm]"].iloc[ch1_sp0_index].mean()
+#ch1sp5
+ch1_sp5_startTime = ch1_sp5['Time [s]'].min()+8
+ch1_sp5_endTime = ch1_sp5_startTime + 20 
+ch1_sp5_index = ch1_sp5.index[ch1_sp5['Time [s]']==ch1_sp5_startTime].tolist()
+ch1sp5_focusedMean = ch1_sp5["Flow Rate [Sccm]"].iloc[1051:].mean()
+
+
+#ch2 math
+ch2 = df.loc[df['Channel'] == "Two"]
+ch2_sp0 = ch2.loc[df['Setpoint [psi]']==0]
+ch2sp0_mean=ch2_sp0["Flow Rate [Sccm]"].mean() 
+ch2_sp5 = ch2.loc[df['Setpoint [psi]']==5]
+ch2sp5_mean=ch2_sp5["Flow Rate [Sccm]"].mean()
+#basic flow noise math ch2
+ch2_basicMath = abs(ch2sp5_mean - ch2sp0_mean)
+if ch2_basicMath < 0.1:
+    ch2_basicPass = True 
+else: ch2_basicPass = False
+
+#ch2 focused 
+# ch2sp0_timeOffset = ch2_sp0['Index'].min()+30
+# ch2_sp0_index = ch2_sp0.index[ch2_sp0['Time [s]']==ch2sp0_timeOffset].tolist()
+# ch2sp0_30seconds_mean=ch2_sp0["Flow Rate [Sccm]"].iloc[ch2_sp0['Index'].min():ch2_sp0_index].mean()
+
+
+#ch3 math
+ch3 = df.loc[df['Channel'] == "Three"]
+ch3_sp0 = ch3.loc[df['Setpoint [psi]']==0]
+ch3sp0_mean=ch3_sp0["Flow Rate [Sccm]"].mean()
+ch3_sp5 = ch3.loc[df['Setpoint [psi]']==5]
+ch3sp5_mean=ch3_sp5["Flow Rate [Sccm]"].mean()
+#basic flow noise math ch3
+ch3_basicMath = abs(ch3sp5_mean - ch3sp0_mean)
+if ch3_basicMath < 0.1:
+    ch3_basicPass = True 
+else: ch3_basicPass = False
+
+#ch3 focused 
+# y = ch3_sp0['Time [s]'].min()+30
+# ch3_sp0_index = ch3_sp0.index[ch3_sp0['Time [s]']==y].tolist()
+# ch3sp0_30seconds_mean=ch3_sp0["Flow Rate [Sccm]"].iloc[:4153].mean()
+
+
+print("ch1 basic pass: " + str(ch1_basicPass))
+print("ch2 basic pass: " + str(ch2_basicPass))
+print("ch3 basic pass: " + str(ch3_basicPass))
